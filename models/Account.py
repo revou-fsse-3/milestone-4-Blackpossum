@@ -1,18 +1,18 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, DECIMAL, DateTime, ForeignKey,func
+from sqlalchemy.orm import relationship, mapped_column
 from models.base import Base
 from models.Transactions import Transactions
 
 class Accounts(Base):
     __tablename__ = 'Accounts'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('Users.id'), nullable=False)
-    account_type = Column(String(255), nullable=False)
-    account_number = Column(String(255), unique=True, nullable=False)
-    balance = Column(DECIMAL(10, 2), nullable=False, default=0.0)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id = mapped_column(Integer, ForeignKey('Users.id'), nullable=False)
+    account_type = mapped_column(String(255), nullable=False)
+    account_number = mapped_column(String(255), unique=True, nullable=False)
+    balance = mapped_column(DECIMAL(10, 2), nullable=False, default=0.0)
+    created_at = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     # Define relationships
     user = relationship('Users', back_populates='accounts')

@@ -1,17 +1,17 @@
-from sqlalchemy import Column, Integer, DECIMAL, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, DECIMAL, String, DateTime, ForeignKey,func
+from sqlalchemy.orm import relationship, mapped_column
 from models.base import Base
 
 class Transactions(Base):
     __tablename__ = 'Transactions'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    from_account_id = Column(Integer, ForeignKey('Accounts.id'))
-    to_account_id = Column(Integer, ForeignKey('Accounts.id'))
-    amount = Column(DECIMAL(10, 2), nullable=False)
-    type = Column(String(255), nullable=False)
-    description = Column(String(255))
-    created_at = Column(DateTime, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    from_account_id = mapped_column(Integer, ForeignKey('Accounts.id'))
+    to_account_id = mapped_column(Integer, ForeignKey('Accounts.id'))
+    amount = mapped_column(DECIMAL(10, 2), nullable=False)
+    type = mapped_column(String(255), nullable=False)
+    description = mapped_column(String(255))
+    created_at = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     # Define relationships
     from_account = relationship('Accounts', foreign_keys=[from_account_id], back_populates='transactions_from')
