@@ -1,0 +1,58 @@
+<!-- landing_page.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to My App</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+        }
+        p {
+            color: #333;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Banking app API</h1>
+        <p>This is a simple landing page for demonstration purposes.</p>
+        <p>Please navigate register to test the API.</p>
+        <form action="/register">
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <form action="/login">
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </div>
+</body>
+</html>

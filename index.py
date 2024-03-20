@@ -1,6 +1,6 @@
 # flask import 
 import os
-from flask import Flask
+from flask import Flask, render_template
 from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker
 from connectors.mysql_connectors import engine
@@ -46,6 +46,7 @@ app.register_blueprint(register_routes)
 app.register_blueprint(Login_routes)
 
 @app.route("/")
-def Running_server():
-    return 'server running at port 5000'
-
+# def Running_server():
+#     return 'server running at port 5000'
+def landing_page():
+    return render_template('landing/landing_page.html')
