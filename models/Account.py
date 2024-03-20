@@ -11,7 +11,7 @@ class Accounts(Base):
     account_type = mapped_column(String(255), nullable=False)
     account_number = mapped_column(String(255), unique=True, nullable=False)
     balance = mapped_column(DECIMAL(10, 2), nullable=False, default=0.0)
-    created_at = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at = mapped_column(DateTime(timezone=True), nullable=False,server_default=func.now())
     updated_at = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     # Define relationships

@@ -3,47 +3,20 @@ from connectors.mysql_connectors import Session
 from models.Account import Accounts
 from models.Transactions import Transactions
 from sqlalchemy import select,func,or_
+from flask_login import current_user,login_required
 
 transaction_routes = Blueprint('transaction_routes', __name__)
 
 @transaction_routes.route('/transactions', methods=['GET'])
-def get_transactions():
-    # belum implement user auth 
-    user_id = 1  ##user.id
-    session = Session()
+def transactions_home():
+    return render_template('transaction/transaction_manager.html')
 
-    transactions = session.query(Transactions).join(Accounts).filter(Accounts.user_id == user_id)
-
-    # Filter by account ID
-    account_id = request.args.get('account_id')
-    if account_id:
-        transactions = transactions.filter(Transactions.from_account_id == account_id)
-
-    # Filter by date range
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    if start_date and end_date:
-        transactions = transactions.filter(Transactions.created_at.between(start_date, end_date))
-
-    transaction_list = []
-    for transaction in transactions:
-        transaction_list.append({
-            'id': transaction.id,
-            'from_account_id': transaction.from_account_id,
-            'to_account_id': transaction.to_account_id,
-            'amount': transaction.amount,
-            'type': transaction.type,
-            'description': transaction.description,
-            'created_at': transaction.created_at
-        })
-
-    session.close()
-    return jsonify(transaction_list)
-
-@transaction_routes.route('/transactions/<int:id>', methods=['GET'])
-def get_transaction_details(id):
+@transaction_routes.route('/transactions', methods=['GET'])
+@login_required
+def get_transaction():
     # implementing auth 
-    user_id = 1  # Example user ID
+    user_id = current_user.id
+    print(current_user.id)
     session = Session()
 
     # Retrieve the transaction by its ID
@@ -66,9 +39,10 @@ def get_transaction_details(id):
     return jsonify(transaction_details)
 
 @transaction_routes.route('/transactions', methods=['POST'])
+@login_required
 def initiate_transaction():
     # authentication here
-    user_id = 1  
+    user_id = current_user
     data = request.json
 
     # Create a new transaction
@@ -86,3 +60,32 @@ def initiate_transaction():
     session.close()
 
     return jsonify({'message': 'Transaction initiated successfully'}), 201
+
+@transaction_routes.route('/transactions/<int:id>', methods=['PUT'])
+@login_required
+def update_transaction(id):
+    try:
+        user_id = current_user.id
+        # Get the updated transaction details from the request
+        data = request.json
+
+        session = Session()
+        transaction = session.query(Transactions).filter(Transactions.id == user_id).first()
+
+        if not transaction:
+            return jsonify({'error': 'Transaction not found'}), 404
+
+        # Update transaction details
+        transaction.from_account_id = data.get('from_account_id', transaction.from_account_id)
+        transaction.to_account_id = data.get('to_account_id', transaction.to_account_id)
+        transaction.amount = data.get('amount', transaction.amount)
+        transaction.type = data.get('type', transaction.type)
+        transaction.description = data.get('description', transaction.description)
+
+        session.commit()
+        session.close()
+
+        return jsonify({'message': 'Transaction updated successfully'}), 200
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500

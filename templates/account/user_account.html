@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Accounts</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+
+      #account-list {
+        width: 80%;
+        margin-bottom: 20px;
+      }
+
+      #add-account-form {
+        width: 30%;
+        display: none;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        margin-bottom: 10px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      button {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .account-details {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .nav-link {
+            display: inline-block;
+            margin-right: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+  </head>
+  <body>
+    <div>
+      <!-- Link to user page -->
+      <a class="nav-link" href="{{ url_for('user_routes.get_user_profile') }}">User Page</a>
+  </div>
+  <div>
+      <!-- Link to account page -->
+      <a class="nav-link" href="{{ url_for('transaction_routes.get_transaction') }}">Transaction Page</a>
+  </div>
+  <div>
+      <!-- Link to logout -->
+      <a class="nav-link" href="{{ url_for('Login_routes.do_user_logout') }}">Logout</a>
+  </div>
+    <div class="container">
+      <h1>Accounts</h1>
+      <table>
+        <tr>
+          <th>ID</th>
+          <th>Account Type</th>
+          <th>Account Number</th>
+          <th>Balance</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Action</th>
+        </tr>
+        {% for account in user_accounts %}
+        <tr>
+          <td>{{ account.id }}</td>
+          <td>{{ account.account_type }}</td>
+          <td>{{ account.account_number }}</td>
+          <td>{{ account.balance }}</td>
+          <td>{{ account.created_at }}</td>
+          <td>{{ account.updated_at }}</td>
+          <td>
+            <button onclick="editAccount('{{ account.id }}')">Edit</button>
+            <button onclick="deleteAccount('{{ account.id }}')">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      <div id="edit-account-form" style="display: none">
+        <h2>Edit Account</h2>
+        <form id="update-account-form">
+          <input type="hidden" id="edit-account-id" name="id" />
+          <label for="edit-account-type">Account Type:</label>
+          <input
+            type="text"
+            id="edit-account-type"
+            name="account_type"
+            required
+          /><br /><br />
+          <label for="edit-account-number">Account Number:</label>
+          <input
+            type="text"
+            id="edit-account-number"
+            name="account_number"
+            required
+          /><br /><br />
+          <label for="edit-balance">Balance:</label>
+          <input
+            type="number"
+            id="edit-balance"
+            name="balance"
+            required
+          /><br /><br />
+          <button type="submit">Update Account</button>
+          <button type="button" onclick="cancelEdit()">Cancel</button>
+        </form>
+      </div>
+    </div>
+    <div id="add-account-form" style="display: none">
+      <h2>Add New Account</h2>
+      <form id="create-account-form">
+        <label for="account-type">Account Type:</label>
+        <input
+          type="text"
+          id="account-type"
+          name="account_type"
+          required
+        /><br /><br />
+        <label for="account-number">Account Number:</label>
+        <input
+          type="text"
+          id="account-number"
+          name="account_number"
+          required
+        /><br /><br />
+        <label for="balance">Balance:</label>
+        <input type="number" id="balance" name="balance" required /><br /><br />
+        <button type="submit">Create Account</button>
+      </form>
+    </div>
+    <button onclick="showAddAccountForm()">Add Account</button>
+
+    <!-- Script to handle form submission and interactions -->
+    <script>
+      // Function to show the add account form
+      function showAddAccountForm() {
+        document.getElementById("add-account-form").style.display = "block";
+      }
+
+      // Function to hide the add account form
+      function hideAddAccountForm() {
+        document.getElementById("add-account-form").style.display = "none";
+      }
+
+      // Function to handle form submission
+      document
+        .getElementById("create-account-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Get form data
+          const formData = new FormData(event.target);
+          const data = {};
+          formData.forEach((value, key) => {
+            data[key] = value;
+          });
+
+          // Send POST request to create a new account
+          fetch("/accounts", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Account created successfully
+                console.log("Account created successfully");
+                // Hide the form
+                hideAddAccountForm();
+                // Refresh the list of user accounts
+                fetchUserAccounts();
+              } else {
+                // Error creating account
+                console.error("Error creating account:", response.statusText);
+              }
+            })
+            .catch((error) => console.error("Error creating account:", error));
+        });
+
+      // Function to fetch user accounts and display them
+      function fetchUserAccounts() {
+        fetch("/accounts", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Display user accounts
+            const accountList = document.getElementById("account-list");
+            accountList.innerHTML = "";
+            data.forEach((account) => {
+              const accountDiv = document.createElement("div");
+              accountDiv.innerHTML = `
+                        <p>Account ID: ${account.id}</p>
+                        <p>Account Type: ${account.account_type}</p>
+                        <p>Account Number: ${account.account_number}</p>
+                        <p>Balance: ${account.balance}</p>
+                        <p>Created At: ${account.created_at}</p>
+                        <p>Updated At: ${account.updated_at}</p>
+                    `;
+              accountList.appendChild(accountDiv);
+            });
+          })
+          .catch((error) =>
+            console.error("Error fetching user accounts:", error)
+          );
+      }
+
+      // Function to show the edit account form
+      function showEditAccountForm(
+        accountId,
+        accountType,
+        accountNumber,
+        balance
+      ) {
+        // Fill the form fields with account details
+        document.getElementById("edit-account-type").value = accountType;
+        document.getElementById("edit-account-number").value = accountNumber;
+        document.getElementById("edit-balance").value = balance;
+
+        // Display the edit account form
+        document.getElementById("edit-account-form").style.display = "block";
+      }
+
+      function editAccount(id) {
+        // Fetch account details and populate the edit form
+        fetch(`/accounts/${id}`)
+          .then((response) => response.json())
+          .then((account) => {
+            document.getElementById("edit-account-id").value = account.id;
+            document.getElementById("edit-account-type").value =
+              account.account_type;
+            document.getElementById("edit-account-number").value =
+              account.account_number;
+            document.getElementById("edit-balance").value = account.balance;
+            document.getElementById("edit-account-form").style.display =
+              "block";
+          })
+          .catch((error) =>
+            console.error("Error fetching account details:", error)
+          );
+      }
+
+      // Function to hide the edit account form
+      function cancelEdit() {
+        document.getElementById("edit-account-form").style.display = "none";
+      }
+
+      // Function to handle form submission for updating account
+      document
+        .getElementById("update-account-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Get form data
+          const formData = new FormData(event.target);
+          const data = {};
+          formData.forEach((value, key) => {
+            data[key] = value;
+          });
+
+          // Send PUT request to update the account
+          fetch(`/accounts/${accountId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Account updated successfully
+                console.log("Account updated successfully");
+                // Hide the form
+                cancelEdit();
+                // Refresh the list of user accounts
+                fetchUserAccounts();
+              } else {
+                // Error updating account
+                console.error("Error updating account:", response.statusText);
+              }
+            })
+            .catch((error) => console.error("Error updating account:", error));
+        });
+      function deleteAccount(id) {
+        // Confirm deletion with the user
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this account?"
+        );
+
+        // If user confirms deletion
+        if (confirmDelete) {
+          // Send a DELETE request to delete the account
+          fetch("/accounts/" + id, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Account deleted successfully
+                console.log("Account deleted successfully");
+                // Refresh the page to update the account list
+                window.location.reload();
+              } else {
+                // Error deleting account
+                console.error("Error deleting account:", response.statusText);
+              }
+            })
+            .catch((error) => console.error("Error deleting account:", error));
+        }
+      }
+    </script>
+  </body>
+</html>

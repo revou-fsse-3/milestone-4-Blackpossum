@@ -3,7 +3,11 @@ from sqlalchemy.orm import relationship,mapped_column
 from models.base import Base
 from models.Account import Accounts
 
-class Users(Base):
+# password encryption
+from flask_login import UserMixin
+import bcrypt
+
+class Users(Base,UserMixin):
     __tablename__ = 'Users'
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -15,6 +19,14 @@ class Users(Base):
 
     # Define relationships
     accounts = relationship('Accounts', back_populates='user')
+
+    def set_password(self, plaintext_password):
+        self.password_hash = bcrypt.hashpw(plaintext_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')  # Store the hash as a string
+
+    def check_password(self,password):
+        # check password from bcrypt package
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
 
     def __repr__(self):
         return f"<Users(id={self.id}, username={self.username}, email={self.email}, created_at={self.created_at}, updated_at={self.updated_at})>"
